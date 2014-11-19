@@ -230,4 +230,35 @@ class EventRouterTest < ::Test::Unit::TestCase
       end
     end
   end
+
+  sub_test_case EventRouter::Rule do
+    def test_single
+      # this should've verified at test/test_match.rb
+      assert_match('a', 'a')
+      assert_match('a*', 'aa')
+      assert_match('a.**', 'a.a.a')
+    end
+
+    def test_multiple
+      assert_match(    'a    b   ', 'a')
+      assert_match(    'a    b   ', 'b')
+      assert_not_match('a    b   ', 'c')
+      assert_match(    'a*   b*  ', 'aa')
+      assert_match(    'a*   b*  ', 'bb')
+      assert_not_match('a*   b*  ', 'cc')
+      assert_match(    'a.** b.**', 'a.a.a')
+      assert_match(    'a.** b.**', 'b.b.b')
+      assert_not_match('a.** b.**', 'c.c.c')
+    end
+
+    def assert_match(pattern, tag)
+      rule = Fluent::EventRouter::Rule.new(pattern, nil)
+      assert_true rule.match?(tag)
+    end
+
+    def assert_not_match(pattern, tag)
+      rule = Fluent::EventRouter::Rule.new(pattern, nil)
+      assert_false rule.match?(tag)
+    end
+  end
 end
